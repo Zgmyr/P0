@@ -1,52 +1,132 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <sstream>
+#include <cctype>
+#include <cstdlib>
+// #include <cstdio>
 
 using namespace std;
 
-static void readStdInput();
+static void exitError(string);
+static bool isNumeric(const string&);
+static void validateCin(ofstream&);
+static void validateArgvFile(const char*, ofstream&);
 
 int main(int argc, char* argv[]) {
+	
+	// validate argument count
+	if (argc > 2)
+		exitError("Too many arguments were given");
 
-	ifstream inputFile;
-
-	// process arguments & set up read file
+	ofstream tempFile("valid_data.fs26s2");
+	if (!tempFile)
+		exitError("Failed to open temp file for writing");
+	
+	// handle data validation + set up read file
 	if (argc == 1) {
-		// no args -> read from standard input
-		readStdInput();
-		inputFile.open("temp.fs26s2");
+		// read from standard input
+		cout << "Enter numeric data (^Z + ENTER when done): ";
+		validateCin(tempFile);
 	}
 	else {
-		// read from file argument
-		string filename = string(argv[1]) + ".fs26s2";
-
-		inputFile.open(filename);
-
-		if (!inputFile) {
-			cout << "Failed to open file " << filename << endl;
-			return 1;
-		}
+		// read from file argv[1]
+		validateArgvFile(argv[1], tempFile);
 	}
 
-	string testStr;
-	getline(inputFile, testStr);
+	cout << "Data sanitized and saved to \'valid_data.fs26s2\' temporary file\n";
 
-	cout << "first line read = " << testStr << endl;
+	// close writing to file & reopen for reading
+	tempFile.close();
+	ifstream readFile("valid_data.fs26s2");
+
+
+	// build container of string frequencies
+
+	// possibly remove temporary file afterwards with:
+	// remove("valid_data.fs26s2");
 
 	// build the tree
 	
-
-	// traverse the tree 3 ways
+	// output traversing the tree 3 ways to file
 
 
 	return 0;
 }
 
-static void readStdInput() {
-	ofstream tempFile("temp.fs26s2");
+static void exitError(string s) {
+	cout << s << endl;
+	exit(1);
+}
 
+static bool isNumeric(const string& token) {
+
+	/* WIP: need to accept negative integers as tokens
+	accept:  -32
+	deny:    5-8 , 325- , - 
+	
+	plan: use stoi(token, &pos)
+	stoi stops at (size_t) idx position after numeric ends
+		-> check if pos ends at token.length()
+	or conversion fails entirely for pure strings
+	*/
+
+	// THIS NEEDS TO BE FIXED STILL!!!
+	
+    // check each character
+    for (char c : token) {
+		// return false if one is non-numeric
+        if (!isdigit(c))
+            return false;
+    }
+
+	// return true if all are numeric
+    return true;
+}
+
+/** validateCin
+ * Given an opened output file stream
+ * reads lines of standard input (via keyboard/redirection) until EOF (^Z)
+ * sanitizes 32-bit signed integer tokens and writes them to output file stream
+*/
+static void validateCin(ofstream& outFS) {
 	string line;
-	while (getline(cin, line)) {
-		tempFile << line << "\n";
+
+	// read standard user input until EOF (^Z)
+	while (getline(cin,line)) {
+		stringstream ss(line);
+		string token;
+
+		// split line into tokens
+		while (ss >> token) {
+			// validate tokens & write to temp file
+			if (isNumeric(token))
+				outFS << token << " ";
+		}
+	}
+}
+
+/** validateCin
+ * Given a file name (argv[1]) + an opened output file stream
+ * opens filename.fs26s2 for reading & validates opened successfully
+ * reads tokens from opened filename.fs26s2 until EOF
+ * sanitizes 32-bit signed integer tokens and writes them to output file stream
+*/
+static void validateArgvFile(const char* arg, ofstream& outFS) {
+	string filename = string(arg) + ".fs26s2";
+	string token;
+	
+	// open file from argument & validate
+	ifstream argvFile(filename);
+	if (!argvFile)
+		exitError("File \'"+filename+"\' does not exist, or could not be opened");
+
+	cout << "Reading data from \'" << filename << "\'\n";
+
+	// read tokens from argument file until EOF
+	while (argvFile >> token) {
+		// validate tokens & write to temp file
+		if (isNumeric(token))
+			outFS << token << " ";
 	}
 }
