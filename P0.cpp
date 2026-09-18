@@ -9,12 +9,12 @@
 using namespace std;
 
 static void exitError(string);
-static bool isNumeric(const string&);
+static bool isIntToken(const string&);
 static void validateCin(ofstream&);
 static void validateArgvFile(const char*, ofstream&);
 
 int main(int argc, char* argv[]) {
-	
+
 	// validate argument count
 	if (argc > 2)
 		exitError("Too many arguments were given");
@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
 	// handle data validation + set up read file
 	if (argc == 1) {
 		// read from standard input
-		cout << "Enter numeric data (^Z + ENTER when done): ";
+		cout << "Enter numeric data (EOF: Ctrl+Z then ENTER on Windows, Ctrl+D on Linux): ";
 		validateCin(tempFile);
 	}
 	else {
@@ -59,35 +59,39 @@ static void exitError(string s) {
 	exit(1);
 }
 
-static bool isNumeric(const string& token) {
+/** isIntToken
+ * Given a string token & validates its representation as an integer
+ * token is converted from string to integer value
+ * returns false if token contains non-numeric characters
+ * returns true if entire token converts to integer successfully
+ */
+static bool isIntToken(const string& token) {
+	size_t pos;
 
-	/* WIP: need to accept negative integers as tokens
-	accept:  -32
-	deny:    5-8 , 325- , - 
+	// try converting token to integer
+	try {
+		int numericVal = stoi(token, &pos);
+		
+		// failed to convert entire token to int
+		if (pos != token.length()) {
+			cout << "[X] rejected invalid datum \'" << token << "\'\n";
+			return false;
+		}
+	}
+	catch (invalid_argument) {
+		// failed to convert token with starting characters
+		cout << "[X] rejected invalid datum \'" << token << "\'\n";
+		return false;
+	}
 	
-	plan: use stoi(token, &pos)
-	stoi stops at (size_t) idx position after numeric ends
-		-> check if pos ends at token.length()
-	or conversion fails entirely for pure strings
-	*/
-
-	// THIS NEEDS TO BE FIXED STILL!!!
-	
-    // check each character
-    for (char c : token) {
-		// return false if one is non-numeric
-        if (!isdigit(c))
-            return false;
-    }
-
-	// return true if all are numeric
-    return true;
+	// entire token successfully converted
+	return true;
 }
 
 /** validateCin
  * Given an opened output file stream
  * reads lines of standard input (via keyboard/redirection) until EOF (^Z)
- * sanitizes 32-bit signed integer tokens and writes them to output file stream
+ * sanitizes signed integer tokens and writes them to output file stream
 */
 static void validateCin(ofstream& outFS) {
 	string line;
@@ -100,7 +104,7 @@ static void validateCin(ofstream& outFS) {
 		// split line into tokens
 		while (ss >> token) {
 			// validate tokens & write to temp file
-			if (isNumeric(token))
+			if (isIntToken(token))
 				outFS << token << " ";
 		}
 	}
@@ -110,7 +114,7 @@ static void validateCin(ofstream& outFS) {
  * Given a file name (argv[1]) + an opened output file stream
  * opens filename.fs26s2 for reading & validates opened successfully
  * reads tokens from opened filename.fs26s2 until EOF
- * sanitizes 32-bit signed integer tokens and writes them to output file stream
+ * sanitizes signed integer tokens and writes them to output file stream
 */
 static void validateArgvFile(const char* arg, ofstream& outFS) {
 	string filename = string(arg) + ".fs26s2";
@@ -121,12 +125,12 @@ static void validateArgvFile(const char* arg, ofstream& outFS) {
 	if (!argvFile)
 		exitError("File \'"+filename+"\' does not exist, or could not be opened");
 
-	cout << "Reading data from \'" << filename << "\'\n";
+	cout << "Reading data from \'" << filename << "\'...\n";
 
 	// read tokens from argument file until EOF
 	while (argvFile >> token) {
 		// validate tokens & write to temp file
-		if (isNumeric(token))
+		if (isIntToken(token))
 			outFS << token << " ";
 	}
 }
