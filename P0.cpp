@@ -5,6 +5,7 @@
 #include <cctype>
 #include <cstdlib>
 // #include <cstdio>
+#include "tree.h"
 
 using namespace std;
 
