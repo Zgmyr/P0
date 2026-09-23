@@ -41,16 +41,18 @@ int main(int argc, char* argv[]) {
 	tempFile.close();
 	ifstream readFile("valid_data.fs26s2");
 
-
-	// build container of string frequencies
-
-	// possibly remove temporary file afterwards with:
-	// remove("valid_data.fs26s2");
-
-	// build the tree
+	// build BST from sanitized read file
+	node_t* root = buildTree(readFile);
 	
 	// output traversing the tree 3 ways to file
-
+	/**
+	 * WIP -> implement write to file for pre-order & post-order next
+	 */
+	
+	destroyTree(root);
+	
+	// possibly remove temporary file afterwards with:
+	// remove("valid_data.fs26s2");
 
 	return 0;
 }
@@ -61,38 +63,27 @@ static void exitError(string s) {
 }
 
 /** isIntToken
- * Given a string token & validates its representation as an integer
- * token is converted from string to integer value
- * returns false if token contains non-numeric characters
- * returns true if entire token converts to integer successfully
+ * Given a string token & validates if it is numeric
+ * returns true when all characters are digits, false otherwise
  */
 static bool isIntToken(const string& token) {
-	size_t pos;
-
-	// try converting token to integer
-	try {
-		int numericVal = stoi(token, &pos);
-		
-		// failed to convert entire token to int
-		if (pos != token.length()) {
+	
+	// check whether a non-digit character exists
+	for (auto c : token) {
+		if (!isdigit(c)) {
 			cout << "[X] rejected invalid datum \'" << token << "\'\n";
 			return false;
 		}
 	}
-	catch (invalid_argument) {
-		// failed to convert token with starting characters
-		cout << "[X] rejected invalid datum \'" << token << "\'\n";
-		return false;
-	}
-	
-	// entire token successfully converted
+
+	// all characters are digits
 	return true;
 }
 
 /** validateCin
  * Given an opened output file stream
  * reads lines of standard input (via keyboard/redirection) until EOF (^Z)
- * sanitizes signed integer tokens and writes them to output file stream
+ * sanitizes numeric-only tokens and writes them to output file stream
 */
 static void validateCin(ofstream& outFS) {
 	string line;
@@ -111,11 +102,11 @@ static void validateCin(ofstream& outFS) {
 	}
 }
 
-/** validateCin
+/** validateArgvFile
  * Given a file name (argv[1]) + an opened output file stream
  * opens filename.fs26s2 for reading & validates opened successfully
  * reads tokens from opened filename.fs26s2 until EOF
- * sanitizes signed integer tokens and writes them to output file stream
+ * sanitizes numeric-only tokens and writes them to output file stream
 */
 static void validateArgvFile(const char* arg, ofstream& outFS) {
 	string filename = string(arg) + ".fs26s2";
