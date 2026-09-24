@@ -1,6 +1,5 @@
 #include "tree.h"
 
-
 using namespace std;
 
 static node_t* insertDatum(node_t*, string);
@@ -65,6 +64,21 @@ void destroyTree(node_t* root) {
     delete root;
 }
 
+void printPreorder(const node_t* root, const char* baseFilename) {
+    // DEBUG: testing validation for filename
+    if (baseFilename == nullptr)
+        cout << "DEBUG: filename will be " << string("out.preorder") << endl;
+    else
+        cout << "DEBUG: filename will be " << string(baseFilename)+".preorder" << endl;
+        
+    return;
+}
+
+void printPostorder(const node_t* root, const char* baseFilename) {
+    return;
+}
+
+/* HELPER FUNCTIONS */
 
 /** insertDatum
  * given a root node ptr, inserts datum into appropriate node of BST

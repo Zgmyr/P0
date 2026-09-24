@@ -10,7 +10,7 @@
 using namespace std;
 
 static void exitError(string);
-static bool isIntToken(const string&);
+static bool sanitizeToken(string&);
 static void validateCin(ofstream&);
 static void validateArgvFile(const char*, ofstream&);
 
@@ -19,7 +19,8 @@ int main(int argc, char* argv[]) {
 	// validate argument count
 	if (argc > 2)
 		exitError("Too many arguments were given");
-
+	
+	// file to store sanitized data
 	ofstream tempFile("valid_data.fs26s2");
 	if (!tempFile)
 		exitError("Failed to open temp file for writing");
@@ -44,13 +45,13 @@ int main(int argc, char* argv[]) {
 	// build BST from sanitized read file
 	node_t* root = buildTree(readFile);
 	
-	// output traversing the tree 3 ways to file
-	/**
-	 * WIP -> implement write to file for pre-order & post-order next
-	 */
+	// output BST pre/postorder traversal to file
+	printPreorder(root, argv[1]);								// DEBUG TEST
+	printPostorder(root, argv[1]);
 	
 	destroyTree(root);
-	
+	root = nullptr;
+
 	// possibly remove temporary file afterwards with:
 	// remove("valid_data.fs26s2");
 
@@ -62,11 +63,12 @@ static void exitError(string s) {
 	exit(1);
 }
 
-/** isIntToken
- * Given a string token & validates if it is numeric
+/** sanitizeToken
+ * Given a string token, validates it is numeric then sanitizes it
  * returns true when all characters are digits, false otherwise
+ * removes any leading zeros by modifying given token string
  */
-static bool isIntToken(const string& token) {
+static bool sanitizeToken(string& token) {
 	
 	// check whether a non-digit character exists
 	for (auto c : token) {
@@ -75,6 +77,10 @@ static bool isIntToken(const string& token) {
 			return false;
 		}
 	}
+
+	// trim any leading zero's from token
+	int sanitizedToken = stoi(token, nullptr);
+	token = to_string(sanitizedToken);
 
 	// all characters are digits
 	return true;
@@ -96,7 +102,7 @@ static void validateCin(ofstream& outFS) {
 		// split line into tokens
 		while (ss >> token) {
 			// validate tokens & write to temp file
-			if (isIntToken(token))
+			if (sanitizeToken(token))
 				outFS << token << " ";
 		}
 	}
@@ -122,7 +128,7 @@ static void validateArgvFile(const char* arg, ofstream& outFS) {
 	// read tokens from argument file until EOF
 	while (argvFile >> token) {
 		// validate tokens & write to temp file
-		if (isIntToken(token))
+		if (sanitizeToken(token))
 			outFS << token << " ";
 	}
 }

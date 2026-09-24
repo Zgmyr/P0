@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 #include <fstream>
 
 struct node_t {
@@ -15,5 +16,9 @@ struct node_t {
 node_t* buildTree(std::ifstream&);
 
 void destroyTree(node_t*);
+
+void printPreorder(const node_t*, const char*);
+
+void printPostorder(const node_t*, const char*);
 
 #endif
