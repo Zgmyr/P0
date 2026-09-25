@@ -1,3 +1,16 @@
+/**
+ * tree.cpp
+ * Zachary Gmyr
+ * CS4280 - Program Translation Project
+ * 09/25/2026
+ * 
+ * Implements binary search tree construction, insertion, traversal output, and destruction. Expects
+ * data to be passed as a file, containing only nonnegative integers, where BST key is the number of
+ * digits in a datum AFTER ignoring any leading zeros. Datums are grouped by digit-count key while
+ * preserving unique datums in the order by which they are read from the input file. Nodes are defined
+ * in a separate header (see node.h).
+ */
+
 #include "tree.h"
 
 using namespace std;
@@ -8,18 +21,19 @@ static void traversePostorder(const node_t*, int, ofstream&);
 
 
 /** buildTree
- * given an input file stream, responsible for constructing BST.
- * first pass collects unique datums from tokens stored in given file
+ * given an input file stream, responsible for constructing BST where
+ * the input file is expected to contain only nonnegative integers.
+ * first pass collects unique datums from tokens stored in given file,
  * second pass inserts each of these collected unique datums into BST
  */
-node_t* buildTree(ifstream& file) {
+node_t* buildTree(ifstream& validDataFile) {
 
     // 1st pass: building container of unique datums
     vector<string> uniqueDatums;
     string datum;
 
     // extract each token from validated data file
-    while (file >> datum) {
+    while (validDataFile >> datum) {
 
         // check if datum has been recorded yet
         bool isUnique = true;
@@ -30,13 +44,13 @@ node_t* buildTree(ifstream& file) {
             }
         }
 
-        // add only unique datusms
+        // add only unique datums
         if (isUnique) {
             uniqueDatums.push_back(datum);
         }
     }
 
-    // 2nd pass: building BST in preserved order w/ key = datum-length
+    // 2nd pass: build BST in preserved order, ignoring leading zeros for key
     node_t* root = nullptr;
 
     for (const auto& datum : uniqueDatums) {
@@ -68,7 +82,7 @@ void destroyTree(node_t* root) {
 
 /** printPreorder
  * given a root node to a BST and base filename passed to P0 by argv[1]
- * generates output file with .preorder extention using base filename (or "out" for no argv[1])
+ * generates output file with .preorder extension using base filename (or "out" for no argv[1])
  * uses static helper function to traverse BST in preorder & write node info to output file
  */
 bool printPreorder(const node_t* root, const char* baseFilename) {
@@ -89,7 +103,7 @@ bool printPreorder(const node_t* root, const char* baseFilename) {
 
 /** printPostorder
  * given a root node to a BST and base filename passed to P0 by argv[1]
- * generates output file with .postorder extention using base filename (or "out" for no argv[1])
+ * generates output file with .postorder extension using base filename (or "out" for no argv[1])
  * uses static helper function to traverse BST in postorder & write node info to output file
  */
 bool printPostorder(const node_t* root, const char* baseFilename) {
@@ -111,28 +125,31 @@ bool printPostorder(const node_t* root, const char* baseFilename) {
 /* HELPER FUNCTIONS */
 
 /** insertDatum
- * given a root node ptr, inserts datum into appropriate node of BST
- * where BST key = datum length (number of digits).
- * recursively searches child subtrees until finding the corresponding
- * node with key == datum's length, or creates a node if one does not exist
+ * given a root node ptr, inserts validated integer datum into appropriate node of BST
+ * BST key = number of digits AFTER ignoring leading zeros
+ * recursively searches child subtrees until finding a node with the same key,
+ * or creates a new node if one does not exist
  */
 static node_t* insertDatum(node_t* root, string datum) {
+    // calculate digit-count key AFTER ignoring leading zeros
+    string trimmedDatum = to_string(stoi(datum,nullptr));
+
     // base case, if node does not exist create one and return it
     if (root == nullptr) {
         root = new node_t;
-        root->key = datum.length();
+        root->key = trimmedDatum.length();
         root->datums.push_back(datum);
         return root;
     }
     
-    // matching case, subtree root has the key of the current datum length
-    if (datum.length() == root->key) {
+    // matching case, subtree root has the same digit-count key
+    if (trimmedDatum.length() == root->key) {
         root->datums.push_back(datum);
         return root;
     }
 
     // recursive cases, search the appropriate child subtree
-    if (datum.length() < root->key) {
+    if (trimmedDatum.length() < root->key) {
         root->left = insertDatum(root->left, datum);
     }
     else

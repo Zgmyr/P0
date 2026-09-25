@@ -1,3 +1,12 @@
+/**
+ * tree.h
+ * Zachary Gmyr
+ * CS4280 - Program Translation Project
+ * 09/25/2026
+ * 
+ * Declares the public BST operations used by P0 driver
+ */
+
 #ifndef TREE_H
 #define TREE_H
 
@@ -5,13 +14,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-
-struct node_t {
-    int key = 0;
-    std::vector<std::string> datums;
-    node_t* left = nullptr;
-    node_t* right = nullptr;
-};
+#include "node.h"
 
 node_t* buildTree(std::ifstream&);
 
