@@ -17,8 +17,8 @@ node_t* buildTree(std::ifstream&);
 
 void destroyTree(node_t*);
 
-void printPreorder(const node_t*, const char*);
+bool printPreorder(const node_t*, const char*);
 
-void printPostorder(const node_t*, const char*);
+bool printPostorder(const node_t*, const char*);
 
 #endif

@@ -4,7 +4,6 @@
 #include <sstream>
 #include <cctype>
 #include <cstdlib>
-// #include <cstdio>
 #include "tree.h"
 
 using namespace std;
@@ -46,14 +45,15 @@ int main(int argc, char* argv[]) {
 	node_t* root = buildTree(readFile);
 	
 	// output BST pre/postorder traversal to file
-	printPreorder(root, argv[1]);								// DEBUG TEST
-	printPostorder(root, argv[1]);
+	if (!printPreorder(root, argv[1]))
+		cout << "Failed to generate .preorder output file\n";
+
+	if (!printPostorder(root, argv[1]))
+		cout << "Failed to generate .postorder output file\n";
 	
+	// cleanup allocated node_t* structures
 	destroyTree(root);
 	root = nullptr;
-
-	// possibly remove temporary file afterwards with:
-	// remove("valid_data.fs26s2");
 
 	return 0;
 }

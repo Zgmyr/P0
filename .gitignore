@@ -1,2 +1,4 @@
 *.exe
 *.fs26s2
+*.preorder
+*.postorder

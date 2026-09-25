@@ -3,6 +3,8 @@
 using namespace std;
 
 static node_t* insertDatum(node_t*, string);
+static void traversePreorder(const node_t*, int, ofstream&);
+static void traversePostorder(const node_t*, int, ofstream&);
 
 
 /** buildTree
@@ -64,18 +66,46 @@ void destroyTree(node_t* root) {
     delete root;
 }
 
-void printPreorder(const node_t* root, const char* baseFilename) {
-    // DEBUG: testing validation for filename
-    if (baseFilename == nullptr)
-        cout << "DEBUG: filename will be " << string("out.preorder") << endl;
-    else
-        cout << "DEBUG: filename will be " << string(baseFilename)+".preorder" << endl;
-        
-    return;
+/** printPreorder
+ * given a root node to a BST and base filename passed to P0 by argv[1]
+ * generates output file with .preorder extention using base filename (or "out" for no argv[1])
+ * uses static helper function to traverse BST in preorder & write node info to output file
+ */
+bool printPreorder(const node_t* root, const char* baseFilename) {
+    // set output filename based on P0 argument (if exists)
+    string outFilename = (baseFilename != nullptr) ? string(baseFilename)+".preorder" : "out.preorder";
+
+    // open output file & validate successfully opened
+    ofstream outFile(outFilename);
+
+    if (!outFile)
+        return false;
+    
+    // traverse BST by preorder & print to outFile
+    traversePreorder(root, 0, outFile);
+
+    return true;
 }
 
-void printPostorder(const node_t* root, const char* baseFilename) {
-    return;
+/** printPostorder
+ * given a root node to a BST and base filename passed to P0 by argv[1]
+ * generates output file with .postorder extention using base filename (or "out" for no argv[1])
+ * uses static helper function to traverse BST in postorder & write node info to output file
+ */
+bool printPostorder(const node_t* root, const char* baseFilename) {
+    // set output filename based on P0 argument (if exists)
+    string outFilename = (baseFilename != nullptr) ? string(baseFilename)+".postorder" : "out.postorder";
+
+    // open output file & validate successfully opened
+    ofstream outFile(outFilename);
+    
+    if (!outFile)
+        return false;
+    
+    // traverse BST by postorder & print to outFile
+    traversePostorder(root, 0, outFile);
+
+    return true;
 }
 
 /* HELPER FUNCTIONS */
@@ -110,4 +140,47 @@ static node_t* insertDatum(node_t* root, string datum) {
     
     // return subtree root as recursion unwinds
     return root;
+}
+
+/** traversePreorder
+ * helper func for printPreorder, initally given root node, level 0, and output file
+ * uses recursion to traverse BST by preorder and writes node contents to output file
+ */
+static void traversePreorder(const node_t* root, int level, ofstream& outFile) {
+    // base case, end of subtree
+    if (root == nullptr)
+        return;
+    
+    // write subtree root to output file
+    outFile << string(level * 2, ' ') << "=" << root->key << ": ";
+    for (const auto& datum : root->datums) {
+        outFile << datum << " ";
+    }
+    outFile << "\n";
+
+    // recursive cases, traverse left/right subtrees
+    traversePreorder(root->left, level + 1, outFile);
+    traversePreorder(root->right, level + 1, outFile);
+}
+
+/** traversePostorder
+ * helper func for printPostorder, initally given root node, level 0, and output file
+ * uses recursion to traverse BST by postorder and writes node contents to output file
+ */
+static void traversePostorder(const node_t* root, int level, ofstream& outFile) {
+    // base case, end of subtree
+    if (root == nullptr)
+        return;
+    
+    // recursive cases, traverse left/right subtrees
+    traversePostorder(root->left, level + 1, outFile);
+    traversePostorder(root->right, level + 1, outFile);
+
+    // write subtree root to output file
+    outFile << string(level * 2, ' ') << "=" << root->key << ": ";
+    for (const auto& datum : root->datums) {
+        outFile << datum << " ";
+    }
+    outFile << "\n";
+
 }
