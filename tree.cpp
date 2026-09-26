@@ -37,7 +37,7 @@ node_t* buildTree(ifstream& validDataFile) {
 
         // check if datum has been recorded yet
         bool isUnique = true;
-        for (int i = 0; i < uniqueDatums.size(); i++) {
+        for (size_t i = 0; i < uniqueDatums.size(); i++) {
             if (uniqueDatums[i] == datum) {
                 isUnique = false;
                 break;
@@ -133,23 +133,24 @@ bool printPostorder(const node_t* root, const char* baseFilename) {
 static node_t* insertDatum(node_t* root, string datum) {
     // calculate digit-count key AFTER ignoring leading zeros
     string trimmedDatum = to_string(stoi(datum,nullptr));
+    int datumKey = static_cast<int>(trimmedDatum.length());
 
     // base case, if node does not exist create one and return it
     if (root == nullptr) {
         root = new node_t;
-        root->key = trimmedDatum.length();
+        root->key = datumKey;
         root->datums.push_back(datum);
         return root;
     }
     
     // matching case, subtree root has the same digit-count key
-    if (trimmedDatum.length() == root->key) {
+    if (datumKey == root->key) {
         root->datums.push_back(datum);
         return root;
     }
 
     // recursive cases, search the appropriate child subtree
-    if (trimmedDatum.length() < root->key) {
+    if (datumKey < root->key) {
         root->left = insertDatum(root->left, datum);
     }
     else
